@@ -2,10 +2,8 @@
 //
 //     final post = postFromJson(jsonString);
 
-import 'dart:convert';
-
-List<Post> postFromJson(String str) =>
-    List<Post>.from(json.decode(str).map((x) => Post.fromJson(x)));
+List<Post> postFromJson(List str) =>
+    List<Post>.from((str).map((x) => Post.fromJson(x)));
 
 class Post {
   Post({
@@ -82,8 +80,10 @@ class Embedded {
   factory Embedded.fromJson(Map<String, dynamic> json) => Embedded(
         author:
             List<Author>.from(json["author"].map((x) => Author.fromJson(x))),
-        wpFeaturedmedia: List<WpFeaturedmedia>.from(
-            json["wp:featuredmedia"].map((x) => WpFeaturedmedia.fromJson(x))),
+        wpFeaturedmedia: json["wp:featuredmedia"] == null
+            ? null
+            : List<WpFeaturedmedia>.from(json["wp:featuredmedia"]
+                .map((x) => WpFeaturedmedia.fromJson(x))),
         wpTerm: List<List<WpTerm>>.from(json["wp:term"]
             .map((x) => List<WpTerm>.from(x.map((x) => WpTerm.fromJson(x))))),
       );

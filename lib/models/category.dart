@@ -2,13 +2,11 @@
 //
 //     final post = postFromJson(jsonString);
 
-import 'dart:convert';
+List<Category> categoriesFromJson(List str) =>
+    List<Category>.from((str).map((x) => Category.fromJson(x)));
 
-List<Post> postFromJson(String str) =>
-    List<Post>.from(json.decode(str).map((x) => Post.fromJson(x)));
-
-class Post {
-  Post({
+class Category {
+  Category({
     this.id,
     this.count,
     this.description,
@@ -26,7 +24,7 @@ class Post {
   String slug;
   String taxonomy;
 
-  factory Post.fromJson(Map<String, dynamic> json) => Post(
+  factory Category.fromJson(Map<String, dynamic> json) => Category(
         id: json["id"],
         count: json["count"],
         description: json["description"],
