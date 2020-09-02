@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:imazine/models/category.dart';
 import 'package:imazine/models/post.dart';
-import 'package:imazine/utils/logger_utils.dart';
-import 'package:imazine/utils/post_utils.dart';
+import 'package:imazine/utils/logger.dart';
+import 'package:imazine/services/post.dart';
 import 'package:imazine/widgets/loading_indicator.dart';
 import 'package:imazine/widgets/post_card.dart';
 

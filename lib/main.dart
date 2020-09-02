@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:get/route_manager.dart';
 import 'package:imazine/screens/home_screen.dart';
 import 'package:imazine/utils/config.dart';
+import 'package:imazine/utils/theme_manager.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-bool isDarkMode = false;
 Future<void> main() async {
   await initializeDateFormatting("id_ID", null).then(
     (_) => runApp(
@@ -40,10 +40,25 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  void initializeTheme() async {
+    await getTheme();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeTheme();
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (ThemeMode.system == ThemeMode.dark) isDarkMode = true;
+    if (ThemeMode.system == ThemeMode.dark) globalTheme = GlobalTheme.dark;
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,

@@ -2,4 +2,5 @@
 <resources>
     <color name="amber">#FFC107</color>
     <color name="backgroundBlack">#121212</color>
+    <color name="bgWhite">#FFFFFF</color>
 </resources>

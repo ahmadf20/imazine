@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:imazine/main.dart';
 import 'package:imazine/models/category.dart';
 import 'package:imazine/models/post.dart';
+import 'package:imazine/screens/about_app.dart';
 import 'package:imazine/screens/detail_post.dart';
 import 'package:imazine/screens/post_by_category.dart';
-import 'package:imazine/utils/category_utils.dart';
-import 'package:imazine/utils/logger_utils.dart';
-import 'package:imazine/utils/post_utils.dart';
+import 'package:imazine/services/category.dart';
+import 'package:imazine/utils/logger.dart';
+import 'package:imazine/services/post.dart';
+import 'package:imazine/utils/theme_manager.dart';
 import 'package:imazine/widgets/load_image.dart';
 import 'package:imazine/widgets/loading_indicator.dart';
 import 'package:imazine/widgets/post_card.dart';
@@ -110,19 +111,31 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: <Widget>[
-          FlatButton(
-            shape: CircleBorder(),
-            child: FaIcon(
-              isDarkMode
+          IconButton(
+            icon: FaIcon(
+              globalTheme == GlobalTheme.dark
                   ? FontAwesomeIcons.toggleOn
                   : FontAwesomeIcons.toggleOff,
+              color:
+                  globalTheme == GlobalTheme.dark ? Colors.white : Colors.black,
             ),
             onPressed: () {
-              Get.changeThemeMode(
-                  isDarkMode ? ThemeMode.light : ThemeMode.dark);
-              isDarkMode = !isDarkMode;
+              setTheme(globalTheme == GlobalTheme.dark
+                  ? GlobalTheme.light
+                  : GlobalTheme.dark);
               setState(() {});
             },
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: IconButton(
+                icon: Icon(
+                  Icons.info,
+                  color: globalTheme == GlobalTheme.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+                onPressed: () => Get.to(AboutAppScreen())),
           ),
         ],
         title: Text(
@@ -162,33 +175,36 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 60,
       child: listCategory == null
           ? loadingIndicator()
-          : ListView.separated(
-              separatorBuilder: (context, index) {
-                return SizedBox(width: 15);
-              },
-              padding: EdgeInsets.fromLTRB(25, 10, 25, 10),
+          : ListView.builder(
+              padding: EdgeInsets.fromLTRB(25, 10, 10, 10),
               itemCount: listCategory?.length ?? 0,
               shrinkWrap: true,
               scrollDirection: Axis.horizontal,
               itemBuilder: (BuildContext context, int index) {
                 Category item = listCategory[index];
 
-                return FlatButton(
-                  onPressed: () => Get.to(PostByCategoryScreen(category: item)),
-                  child: Text(
-                    '${item.name.toUpperCase()} (${item.count})',
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  color: Colors.black12,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                );
+                return item.count == 0
+                    ? Container()
+                    : Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: FlatButton(
+                          onPressed: () =>
+                              Get.to(PostByCategoryScreen(category: item)),
+                          child: Text(
+                            '${item.name.toUpperCase()}',
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                          color: Colors.black12,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      );
               },
             ),
     );
@@ -211,27 +227,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  AspectRatio buildLatestPosts() {
-    return AspectRatio(
-      aspectRatio: 1.15,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemCount: topPost,
-        itemBuilder: (context, index) {
-          Post item = listPost[index];
+  Widget buildLatestPosts() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        SizedBox(width: 10),
+        ...listPost.sublist(0, topPost).map((item) {
           return GestureDetector(
             onTap: () {
               Get.to(DetailScreen(item: item));
             },
             child: Container(
               width: 250,
-              margin: EdgeInsets.all(25),
+              margin: EdgeInsets.all(15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Expanded(
-                    flex: 5,
+                  SizedBox(
+                    height: 200,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Hero(
@@ -255,29 +268,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      width: double.maxFinite,
-                      child: Text(
-                        HtmlUnescape().convert(item.title.rendered),
-                        style: TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        maxLines: 3,
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
+                  Container(
+                    width: double.maxFinite,
+                    child: Text(
+                      HtmlUnescape().convert(item.title.rendered),
+                      style: TextStyle(
+                        fontFamily: 'Montserrat',
+                        fontSize: 16.5,
+                        fontWeight: FontWeight.w700,
                       ),
+                      maxLines: 3,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
           );
-        },
-      ),
+        }).toList(),
+        SizedBox(width: 10),
+      ]),
     );
   }
 
@@ -288,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
         text,
         style: TextStyle(
           fontFamily: 'Montserrat',
-          fontSize: 18,
+          fontSize: 15,
           color: Get.theme.accentColor,
           fontWeight: FontWeight.w800,
         ),
